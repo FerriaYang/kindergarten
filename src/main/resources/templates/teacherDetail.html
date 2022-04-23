@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="../js/jquery-3.5.1.min.js"></script>
+    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+
+    <!-- 可选的 Bootstrap 主题文件（一般不用引入） -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap-theme.min.css" integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
+
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
+</head>
+<script>
+
+    function edit(id) {
+        $("#modify").val("1");
+        $(".modal-title").html("教师信息修改");
+        $.post("http://localhost:313/teacher/getById",{id:id},function(map){
+            let teacher = map["teacher"];
+            $("#id").val(teacher.id);
+            $("#name").val(teacher.name);
+            $("#age").val(teacher.age);
+            if (teacher.gender == 0){
+                $("#male").prop('checked',true);
+            }else if (teacher.gender == 1){
+                $("#female").prop('checked',true);
+            }
+            $("#img").val(teacher.img);
+            $("#address").val(teacher.address);
+            $("#phone").val(teacher.phone);
+            $("#experience").val(teacher.experience);
+            $("#editModal").modal('show');
+        })
+    }
+
+    function save() {
+        let formData = new FormData($("#editForm")[0]);
+        $.ajax({
+            url:"http://localhost:313/teacher/save",
+            method:"post",
+            data:formData,
+            dataType:"json",
+            async:false,
+            cache:false,
+            contentType:false,
+            processData:false,
+            success:function(res){
+                window.location.href="http://localhost:313/teacher/detail";
+            }
+        })
+    }
+</script>
+<body  onload="genderLoad()">
+    <h1>教师信息</h1>
+    <button th:if="${teacher.id == session.user.teacherId}" id="edit" class="btn btn-primary" data-toggle="modal" data-target="#editModal" th:onclick="edit([[${teacher.id}]])">修改我的信息</button>
+    <div id="main">
+        <table class="table" id="teacherTable" style="width: 50%">
+            <tr>
+                <td>姓名</td>
+                <td th:text="${teacher.name}"></td>
+            </tr>
+            <tr>
+                <td>照片</td>
+                <td><img th:src="${teacher.img}" class="img-circle" width="300px"/></td>
+            </tr>
+            <tr>
+                <td>年龄</td>
+                <td th:text="${teacher.age}"></td>
+            </tr>
+            <tr>
+                <td>性别</td>
+                <td id="gender"></td>
+            </tr>
+            <tr>
+                <td>地址</td>
+                <td th:text="${teacher.address}"></td>
+            </tr>
+            <tr>
+                <td>电话</td>
+                <td th:text="${teacher.phone}"></td>
+            </tr>
+            <tr>
+                <td>介绍</td>
+                <td th:text="${teacher.experience}"></td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="modal fade" tabindex="-1" role="dialog" id="editModal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h2 class="modal-title"></h2>
+                </div>
+                <div class="modal-body">
+                    <form id="editForm">
+                        <table class="table table-bordered table-striped">
+                            <input id="id" class="form-control" type="hidden" name="id"/>
+                            <input type="hidden" name="modify" id="modify">
+                            <input type="hidden" name="username" id="username" th:value="${session.user.username}">
+                            <tr>
+                                <td>姓名</td>
+                                <td><input id="name" class="form-control" type="text" name="name" /></td>
+                            </tr>
+                            <tr>
+                                <td>年龄</td>
+                                <td><input id="age" class="form-control" type="number" name="age" /></td>
+                            </tr>
+                            <tr>
+                                <td>性别</td>
+                                <td><input id="male" type="radio" name="gender" value="0"/>男 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input id="female" type="radio" name="gender" value="1"/>女</td>
+                            </tr>
+                            <tr>
+                                <td>图片</td>
+                                <td>
+                                    <input id="file" name="file" type="file" class="form-control">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>地址</td>
+                                <td><input id="address" class="form-control" type="text" name="address" /></td>
+                            </tr>
+                            <tr>
+                                <td>电话</td>
+                                <td><input id="phone" class="form-control" type="number" name="phone" /></td>
+                            </tr>
+                            <tr>
+                                <td>经历</td>
+                                <td><textarea id="experience" class="form-control" name="experience" rows="10" cols="15"></textarea></td>
+                            </tr>
+                        </table>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="save()">保存</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+</body>
+<script type="text/javascript" th:inline="javascript">
+    function genderLoad(){
+        let gender = [[${teacher.gender}]];
+        if (gender == 1){
+            $("#gender").html("女");
+        }else {
+            $("#gender").html("男");
+        }
+    }
+</script>
+</html>

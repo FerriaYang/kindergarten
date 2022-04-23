@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mapper.UserDao">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.entity.User">
+        <id column="username" property="username" />
+        <result column="password" property="password" />
+        <result column="nick_name" property="nickName" />
+        <result column="img" property="img" />
+        <result column="identity_num" property="identityNum" />
+        <result column="parent_id" property="parentId" />
+        <result column="teacher_id" property="teacherId" />
+        <result column="status" property="status" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        username, password, nick_name, img, identity_num, parent_id, teacher_id, status
+    </sql>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"></include> FROM USER
+    </select>
+
+    <select id="getOneByUserName" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"></include> FROM USER WHERE username = #{username}
+    </select>
+
+    <select id="selectLock" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"></include> FROM USER WHERE `status` = 3
+    </select>
+
+    <update id="updateStatusByUsername">
+        UPDATE `user` SET `status` = #{status} WHERE username = #{username}
+    </update>
+
+    <update id="updateParentByUsername">
+        UPDATE `user` SET `parent_id` = #{parentId} WHERE username = #{username}
+    </update>
+
+    <update id="updateTeacherByUsername">
+        UPDATE `user` SET `teacher_id` = #{teacherId} WHERE username = #{username}
+    </update>
+
+    <update id="updateImgByUsername">
+        UPDATE `user` SET `img` = #{img} WHERE username = #{username}
+    </update>
+
+    <update id="updatePasswordByUsername">
+        UPDATE `user` SET `password` = #{password} WHERE username = #{username}
+    </update>
+
+    <update id="updateNickNameByUsername">
+        UPDATE `user` SET `nick_name` = #{nickName} WHERE username = #{username}
+    </update>
+
+    <insert id="insertUser">
+        INSERT INTO `user`(`username`,`password`,`nick_name`,`identity_num`) VALUES(#{user.username},#{user.password},#{user.nickName},#{user.identityNum})
+    </insert>
+
+    <delete id="deleteByUsername">
+        DELETE FROM USER WHERE username = #{username}
+    </delete>
+</mapper>

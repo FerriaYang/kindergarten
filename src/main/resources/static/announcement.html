@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="js/jquery-3.5.1.min.js"></script>
+    <script src="js/bootstrap/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="js/bootstrap/css/bootstrap.min.css">
+
+    <link rel="stylesheet" href="js/bootstrap-table/bootstrap-table.min.css">
+    <script src="js/bootstrap-table/bootstrap-table.min.js"></script>
+    <script src="js/bootstrap-table/bootstrap-table-zh-CN.min.js"></script>
+
+    <script type="text/javascript">
+        $(function () {
+            search();
+        });
+
+        function search(){
+            getRefresh();
+            $("#datagrid").bootstrapTable({
+
+                url: "/announcement/list",
+                method: "get",
+                dataType: "json",
+
+                clickToSelect: true,
+                singleSelect: true,
+
+                pagination: true,
+                pageNumber: 1,
+                pageSize: 1,
+                pageList: [5, 10 ,20 , 50],
+                sidePagination: "server",
+                smartDisplay: false,
+
+                columns: [
+                    {checkbox: true},
+                    {field: "id", title: "编号"},
+                    {field: "title", title: "标题"},
+                    {field: "content", title: "内容"},
+                    {field: "date", title: "日期"}
+                ],
+                queryParams: function (params) {
+                    var json = {
+                        size: params.limit,
+                        pageNum: (params.offset / params.limit) + 1,
+                    };
+                    return json;
+                }
+            })
+        }
+
+        //增删改后更新列表
+        function getRefresh() {
+            $("#datagrid").bootstrapTable('refresh');
+        }
+
+        function getSelectRow() {
+            // 获取当前行
+            var rows=$("#datagrid").bootstrapTable('getSelections');
+            console.log(rows[0].empno);
+        }
+
+        function detail(){
+            var rows=$("#datagrid").bootstrapTable('getSelections');
+            if (rows.length<1){
+                alert("请勾选要查看的公告！");
+            }else {
+                $.get("http://localhost:313/announcement/detail",
+                    {id:rows[0].id}
+                )
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>公告</h1>
+    <div style="display: flex">
+        <button id="add" class="btn btn-success" data-toggle="modal" data-target="#editModal" onclick="add()">新增</button>&nbsp;&nbsp;
+        <button id="edit" class="btn btn-primary" onclick="edit()">修改</button>&nbsp;&nbsp;
+        <button id="remove" class="btn btn-danger" onclick="del()">删除</button>&nbsp;&nbsp;
+    </div>
+    <table id="datagrid"></table>
+</body>
+</html>

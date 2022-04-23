@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="../js/jquery-3.5.1.min.js"></script>
+    <script src="../js/bootstrap/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="../js/bootstrap/css/bootstrap.min.css">
+</head>
+<body>
+    <h1>公告详情</h1>
+    <table class="table" id="annoDetail">
+        <tr>
+            <td colspan="3" style="text-align: center"><h2>通知</h2></td>
+        </tr>
+        <tr>
+            <td>类型：</td>
+            <td th:text="${announcement.title}"></td>
+        </tr>
+        <tr rowspan="2">
+            <td colspan="3" th:text="${announcement.content}">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        </tr>
+        <tr>
+            <td>日期：</td>
+            <td th:text="${#dates.format(announcement.date,'yyyy-MM-dd')}"></td>
+        </tr>
+    </table>
+</body>
+</html>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>用户页</title>
+    <script src="../js/jquery-3.5.1.min.js"></script>
+    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
+          integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+
+    <!-- 可选的 Bootstrap 主题文件（一般不用引入） -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap-theme.min.css"
+          integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
+
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"
+            integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd"
+            crossorigin="anonymous"></script>
+
+    <script type="text/javascript" th:inline="javascript">
+
+        function del(username) {
+            if (confirm("请确认是否删除用户" + username)) {
+                $.get("/user/del", {username: username}, function (res) {
+                    if (res) {
+                        location.reload();
+                    }else {
+                        alert("非空用户，不可删除！");
+                    }
+                })
+            }
+        }
+
+        function unlock(username){
+            if (confirm("请确认是否解锁用户" + username)){
+                $.get("/user/unlock", {username: username}, function (res) {
+                    if (res) {
+                        location.reload();
+                    }else {
+                        alert("未知原因，请联系管理员");
+                    }
+                })
+            }
+        }
+
+        let lock = [[${lock}]];
+        function search() {
+            let username = $("#condition").val();
+            window.location.href = "http://localhost:313/user/page?username=" + username;
+        }
+
+        function inputLoad() {
+            let searchInput = [[${username}]];
+            if (searchInput != null) {
+                $("#condition").val(searchInput);
+            }
+        }
+
+        function homePage() {
+            let name = $("#condition").val();
+            if (lock != null){
+                window.location.href = "http://localhost:313/user/checkLock?pageNum=1&username=" + username;
+            }else {
+                window.location.href = "http://localhost:313/user/page?pageNum=1&username=" + username;
+            }
+        }
+
+        function prePage() {
+            let name = $("#condition").val();
+            if (lock != null){
+                window.location.href = "http://localhost:313/user/checkLock?pageNum=" + [[${current - 1}]] + "&username=" + username;
+            }else {
+                window.location.href = "http://localhost:313/user/page?pageNum=" + [[${current - 1}]] + "&username=" + username;
+            }
+        }
+
+        function nextPage() {
+            let name = $("#condition").val();
+            if (lock != null){
+                window.location.href = "http://localhost:313/user/checkLock?pageNum=" + [[${current + 1}]] + "&username=" + username;
+            }else {
+                window.location.href = "http://localhost:313/user/page?pageNum=" + [[${current + 1}]] + "&username=" + username;
+            }
+        }
+
+        function lastPage() {
+            let name = $("#condition").val();
+            if (lock != null){
+                window.location.href = "http://localhost:313/user/checkLock?pageNum=" + [[${lastPage}]] + "&username=" + username;
+            }else {
+                window.location.href = "http://localhost:313/user/page?pageNum=" + [[${lastPage}]] + "&username=" + username;
+            }
+        }
+    </script>
+</head>
+<style>
+    table {
+        text-align: center;
+    }
+
+    #searchButton {
+        position: absolute;
+        margin-top: -1px;
+    }
+</style>
+<body onload="inputLoad()">
+<h1>用户页</h1>
+<div class="row">
+    <div class="col-lg-3">
+        <div class="input-group">
+            <input id="condition" type="number" class="form-control" placeholder="请输入用户名">
+            <span class="input-group-btn">
+                            <button class="glyphicon glyphicon-search btn btn-default" id="searchButton"
+                                    onclick="search()">
+                            </button>
+                    </span>
+        </div>
+    </div>
+</div>
+<table class="table  table-bordered table-hover">
+    <tr>
+        <td>用户名</td>
+        <td>昵称</td>
+        <td>状态</td>
+        <td>操作</td>
+    </tr>
+    <tr th:each="user:${users}">
+        <td th:text="${user.username}"></td>
+        <td th:text="${user.nickName}"></td>
+        <td th:if="${user.status == null}"><a href="#" class="glyphicon glyphicon-ok-sign"></a></td>
+        <td th:if="${user.status} eq '3'"><a href="#" class="glyphicon glyphicon-remove-sign" th:onclick="unlock([[${user.username}]])"></a></td>
+        <td>
+            <a class="glyphicon glyphicon-trash" th:onclick="del([[${user.username}]])"></a>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="4">
+            <button class="btn btn-primary" onclick="homePage()">首页</button>&nbsp;&nbsp;<button class="btn btn-primary"
+                                                                                                onclick="prePage()">上一页
+        </button>&nbsp;&nbsp;<p style="display: inline" th:text="'总共'+${total}+'条记录 当前第'+${current}+'页'"></p>&nbsp;&nbsp;<button
+                class="btn btn-primary" onclick="nextPage()">下一页
+        </button>&nbsp;&nbsp;<button class="btn btn-primary" onclick="lastPage()">尾页</button>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>公告页</title>
+    <script src="../js/jquery-3.5.1.min.js"></script>
+    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
+          integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+
+    <!-- 可选的 Bootstrap 主题文件（一般不用引入） -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap-theme.min.css"
+          integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
+
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"
+            integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd"
+            crossorigin="anonymous"></script>
+
+    <script type="text/javascript" th:inline="javascript">
+        var modify = 1;
+
+        function clear() {
+            $("#name").val("");
+            $("#gradeSelect").val("0");
+        }
+
+        function add() {
+            modify = 1;
+            clear();
+            $(".modal-title").html("班级信息添加");
+        }
+
+        function edit(id) {
+            modify = 0;
+            $(".modal-title").html("班级信息编辑");
+            $.get("/grade/query", {id: id}, function (grade) {
+                $("#id").val(grade.id);
+                $("#name").val(grade.name);
+                $("#gradeSelect").val(grade.rade);
+            });
+        }
+
+        function save() {
+            let name = $("#gradeSelect").val();
+            let rade = $("#gradeSelect").val();
+            if (name == ''){
+                alert("请输入班级名!");
+            } else if (rade == 0){
+                alert("请选择年级!");
+            }else{
+                var formData = new FormData($("#editForm")[0]);
+                $.ajax({
+                    url: "http://localhost:313/grade/save?modify=" + modify,
+                    method: "post",
+                    data: formData,
+                    dataType: "json",
+                    async: false,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    success: function (res) {
+                        $("#editModal").modal('hide');
+                        location.reload();
+                    }
+                });
+            }
+        }
+
+        function del(id) {
+            if (confirm("请确认是否删除？")) {
+                $.get("/grade/del", {id: id}, function (res) {
+                    if (res) {
+                        location.reload();
+                    }else {
+                        alert("班级下还存在幼儿，不能强制删除！");
+                    }
+                })
+            }
+        }
+
+        function search() {
+            let name = $("#condition").val();
+            window.location.href = "http://localhost:313/grade/page?name=" + name;
+        }
+
+        function inputLoad() {
+            let searchInput = [[${name}]];
+            if (searchInput != null) {
+                $("#condition").val(searchInput);
+            }
+        }
+
+        function homePage() {
+            let name = $("#condition").val();
+            window.location.href = "http://localhost:313/grade/page?pageNum=1&name=" + name;
+        }
+
+        function prePage() {
+            let name = $("#condition").val();
+            window.location.href = "http://localhost:313/grade/page?pageNum=" + [[${current - 1}]] + "&name=" + name;
+        }
+
+        function nextPage() {
+            let name = $("#condition").val();
+            window.location.href = "http://localhost:313/grade/page?pageNum=" + [[${current + 1}]] + "&name=" + name;
+        }
+
+        function lastPage() {
+            let name = $("#condition").val();
+            window.location.href = "http://localhost:313/grade/page?pageNum=" + [[${lastPage}]] + "&name=" + name;
+        }
+    </script>
+</head>
+<style>
+    table {
+        text-align: center;
+    }
+
+    #searchButton {
+        position: absolute;
+        margin-top: -1px;
+    }
+</style>
+<body onload="inputLoad()">
+<h1>班级页</h1>
+<div class="row">
+    <div class="col-lg-3">
+        <div class="input-group">
+            <input id="condition" type="text" class="form-control" placeholder="请输入班级名称">
+            <span class="input-group-btn">
+                            <button class="glyphicon glyphicon-search btn btn-default" id="searchButton"
+                                    onclick="search()">
+                            </button>
+                    </span>
+        </div>
+    </div>
+</div>
+<button th:if="${session.user.identityNum} eq '3'" id="add" class="btn btn-success" data-toggle="modal" data-target="#editModal" onclick="add()">新增</button>
+<table class="table  table-bordered table-hover">
+    <tr>
+        <td>班级名</td>
+        <td>年级</td>
+        <td>班级幼儿</td>
+        <td th:if="${session.user.identityNum} eq '3'">操作</td>
+    </tr>
+    <tr th:each="grade:${grades}">
+        <td th:text="${grade.name}"></td>
+        <td th:if="${grade.rade} eq '1'">小班</td>
+        <td th:if="${grade.rade} eq '2'">中班</td>
+        <td th:if="${grade.rade} eq '3'">大班</td>
+        <td><a class="glyphicon glyphicon-user" th:href="'/grade/pageChildren?id='+${grade.id}"></a></td>
+        <td th:if="${session.user.identityNum} eq '3'">
+            <a class="glyphicon glyphicon-pencil" data-toggle="modal" data-target="#editModal"
+               th:onclick="edit([[${grade.id}]])"></a>&nbsp;&nbsp;
+            <a class="glyphicon glyphicon-trash" th:onclick="del([[${grade.id}]])"></a>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="5">
+            <button class="btn btn-primary" onclick="homePage()">首页</button>&nbsp;&nbsp;<button class="btn btn-primary"
+                                                                                                onclick="prePage()">上一页
+        </button>&nbsp;&nbsp;<p style="display: inline" th:text="'总共'+${total}+'条记录 当前第'+${current}+'页'"></p>&nbsp;&nbsp;<button
+                class="btn btn-primary" onclick="nextPage()">下一页
+        </button>&nbsp;&nbsp;<button class="btn btn-primary" onclick="lastPage()">尾页</button>
+        </td>
+    </tr>
+</table>
+
+
+<div class="modal fade" tabindex="-1" role="dialog" id="editModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                </button>
+                <h2 class="modal-title"></h2>
+            </div>
+            <div class="modal-body">
+                <form id="editForm">
+                    <table class="table table-bordered table-striped">
+                        <input id="id" class="form-control" type="hidden" name="id" hidden/>
+                        <tr>
+                            <td>班级名</td>
+                            <td><input id="name" class="form-control" type="text" name="name"/></td>
+                        </tr>
+                        <tr>
+                            <td>年级</td>
+                            <td>
+                                <select id="gradeSelect" class="form-control" name="rade">
+                                    <option value="0">---请选择---</option>
+                                    <option value="1">小班</option>
+                                    <option value="2">中班</option>
+                                    <option value="3">大班</option>
+                                </select>
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="save()">保存</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+</body>
+</html>

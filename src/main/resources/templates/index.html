@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <!-- 页面meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>幼儿园管理系统</title>
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" name="viewport">
+
+    <script src="../plugins/jQuery/jquery-2.2.3.min.js"></script>
+    <script src="../plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script src="../plugins/jQuery/jquery-3.5.1.min.js"></script>
+    <script src="../plugins/adminLTE/js/app.min.js"></script>
+
+    <link rel="stylesheet" href="../plugins/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../plugins/adminLTE/css/AdminLTE.css">
+    <link rel="stylesheet" href="../plugins/adminLTE/css/skins/_all-skins.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+    
+    <script type="text/javascript">   
+		 function SetIFrameHeight(){
+		  	  var iframeid=document.getElementById("iframe"); //iframe id
+		  	  if (document.getElementById){
+		  		iframeid.height =document.documentElement.clientHeight;			   	   
+			  }
+		 }
+
+		 function editImg(){
+             let formData = new FormData($("#editImgForm")[0]);
+             $.ajax({
+                 url: "http://localhost:313/user/uploadImg",
+                 method: "post",
+                 data: formData,
+                 dataType: "json",
+                 async: false,
+                 cache: false,
+                 contentType: false,
+                 processData: false,
+                 success: function (res) {
+                     location.reload();
+                 }
+             });
+         }
+
+         function confirm(){
+		     let newPassword = $("#newPassword").val();
+		     let confirmPassword = $("#confirmPassword").val();
+		     if (newPassword != confirmPassword){
+		         if ($("#reminder").val() == null){
+                     $("#editPasswordTable").append("<tr colspan='2' id='reminder'><td><p style='color: red'>两次密码不一致，请检查</p></td></tr>");
+                 }
+             }else {
+		         $("#reminder").remove();
+             }
+         }
+
+         function confirm2(){
+             let addNewPassword = $("#addNewPassword").val();
+             let addConfirmPassword = $("#addConfirmPassword").val();
+             if (addNewPassword != addConfirmPassword){
+                 if ($("#reminder2").val() == null){
+                     $("#addUserTable").append("<tr colspan='2' id='reminder2'><td><p style='color: red'>两次密码不一致，请检查</p></td></tr>");
+                 }
+             }else {
+                 $("#reminder2").remove();
+             }
+         }
+
+         function editPassword(){
+             let username = $("#usernamePass").val();
+             let oldPassword = $("#oldPassword").val();
+             let newPassword = $("#newPassword").val();
+             let confirmPassword = $("#confirmPassword").val();
+             if (oldPassword == ""){
+                 alert("请输入原密码");
+             }else if (newPassword == ""){
+                 alert("请输入新密码");
+             }else if (confirmPassword == ""){
+                 alert("请输入确认密码");
+             }else if (newPassword != confirmPassword){
+                 alert("两次密码不一致，请检查");
+             }else {
+                 let data = {
+                     username:username,
+                     oldPassword:oldPassword,
+                     newPassword:newPassword
+                 }
+                 $.post("/user/editPassword",data,function(res){
+                     if (res){
+                         location.reload();
+                     }else {
+                         alert("密码错误！");
+                     }
+                 })
+             }
+         }
+
+         function editNickName(){
+		     let username = $("#usernameNick").val();
+		     let nickName = $("#nickName").val();
+		     if (nickName == "" && nickName == null){
+		         alert("名称不能为空！");
+             }else {
+		         let data = {
+                     username:username,
+                     nickName:nickName
+                 }
+                 $.get("/user/editNickName",data,function(res){
+                     if (res){
+                         location.reload();
+                     }else {
+                         alert("未知错误，请联系管理员解决");
+                     }
+                 })
+             }
+         }
+
+         function addUser(){
+		     let nickName = $("#addNickName").val();
+		     let password = $("#addNewPassword").val();
+		     let addConfirmPassword = $("#addConfirmPassword").val();
+		     let identityNum = $("#identityNum").val();
+		     if (nickName == ""){
+		         alert("昵称不能为空！");
+             }else if (password == ""){
+                 alert("密码不能为空！");
+             }else if (addConfirmPassword == ""){
+                 alert("确认密码不能为空！");
+             }else if (identityNum == -1){
+                 alert("您还未选择身份！");
+             }else if (password != addConfirmPassword){
+		         alert("两次密码输入不一致！");
+             }else {
+		         let data = {
+                     nickName:nickName,
+                     password:password,
+                     identityNum:identityNum
+                 };
+                 $.post("/user/addUser",data,function(res){
+                     if (res != -1){
+                         alert("用户注册成功，您的用户名为：" + res);
+                     }else {
+                         alert("未知错误，请联系管理员解决");
+                     }
+                 })
+             }
+         }
+    
+	</script>
+
+
+</head>
+
+<body class="hold-transition skin-green sidebar-mini" >
+
+    <div class="wrapper">
+
+        <!-- 页面头部 -->
+        <header class="main-header">
+            <!-- Logo -->
+            <a href="#" class="logo">
+                <!-- mini logo for sidebar mini 50x50 pixels -->
+                <span class="logo-mini"><b></b></span>
+                <!-- logo for regular state and mobile devices -->
+                <span class="logo-lg"><b>幼儿园管理系统</b></span>
+            </a>
+            <!-- Header Navbar: style can be found in header.less -->
+            <nav class="navbar navbar-static-top">
+                <!-- Sidebar toggle button-->
+                <a href="#" class="glyphicon glyphicon-list" style="color: white" data-toggle="offcanvas" role="button">
+                    <span class="sr-only">Toggle navigation</span>
+                </a>
+
+                <div class="navbar-custom-menu">
+                    <ul class="nav navbar-nav">
+                        <!-- Messages: style can be found in dropdown.less-->
+
+                        <!-- User Account: style can be found in dropdown.less -->
+                        <li class="dropdown user user-menu">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                <img th:if="${#strings.isEmpty(session.user.img)}"  src="../img/default.png" class="user-image" alt="User Image">
+                                <img th:if="${not #strings.isEmpty(session.user.img)}"  th:src="${session.user.img}" class="user-image" alt="User Image">
+                                <span class="hidden-xs" th:text="${session.user.nickName}"></span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <!-- User image -->
+                                <li class="user-header">
+                                    <img th:if="${#strings.isEmpty(session.user.img)}" src="../img/default.png" class="img-circle" alt="User Image">
+                                    <img th:if="${not #strings.isEmpty(session.user.img)}"  th:src="${session.user.img}" class="img-circle" alt="User Image">
+                                    <a href="#" style="color: white" data-toggle="modal" data-target="#editImg">修改图片</a>
+                                    <a href="#" style="color: white" data-toggle="modal" data-target="#editNickName">修改昵称</a>
+                                </li>
+                                
+                                <!-- Menu Footer-->
+                                <li class="user-footer">
+                                    <div class="pull-left">
+                                        <a href="#" data-toggle="modal" data-target="#editPassword" class="btn btn-default btn-flat">修改密码</a>
+                                    </div>
+                                    <div class="pull-right">
+                                        <a href="http://localhost:313/login.html" class="btn btn-default btn-flat" >注销</a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </li>
+
+                    </ul>
+                </div>
+            </nav>
+        </header>
+        <!-- 页面头部 /-->
+
+        <!-- 导航侧栏 -->
+        <aside class="main-sidebar">
+            <!-- sidebar: style can be found in sidebar.less -->
+            <section class="sidebar">
+                <!-- Sidebar user panel -->
+                <div class="user-panel">
+                    <div class="pull-left image">
+                        <img th:if="${#strings.isEmpty(session.user.img)}" src="../img/default.png" class="img-circle" alt="User Image">
+                        <img th:if="${not #strings.isEmpty(session.user.img)}"  th:src="${session.user.img}" class="img-circle" alt="User Image">
+                    </div>
+                    <div class="pull-left info">
+                        <p th:text="${session.user.nickName}"></p>
+                    </div>
+                </div>
+              
+                <!-- /.search form -->
+
+
+                <!-- 管理员导航 -->
+                <ul class="sidebar-menu"  th:if="${session.user.identityNum} eq '3'">
+                    <li class="header">菜单</li>
+                    <li><a href="/index.html" target="iframe"><i class="fa fa-dashboard"></i> <span>首页</span></a></li>
+
+				    <!-- 菜单 -->
+                    <li class="treeview">
+                        <a href="/announcement/page"  target="iframe">
+                            <i class="fa fa-folder"></i>
+                            <span>公告模块</span>
+                            <span class="pull-right-container">
+				       			<i class="fa fa-angle-left pull-right"></i>
+				   		 	</span>
+                        </a>
+                    </li>
+                    <li class="treeview">
+                        <a href="/grade/page"  target="iframe">
+                            <i class="fa fa-folder"></i>
+                            <span>班级模块</span>
+                            <span class="pull-right-container">
+				       			<i class="fa fa-angle-left pull-right"></i>
+				   		 	</span>
+                        </a>
+                    </li>
+                    <li class="treeview">
+                        <a href="/course/page"  target="iframe">
+                            <i class="fa fa-folder"></i>
+                            <span>课程模块</span>
+                            <span class="pull-right-container">
+				       			<i class="fa fa-angle-left pull-right"></i>
+				   		 	</span>
+                        </a>
+                    </li>
+                    <li class="treeview">
+                        <a href="/teacher.html"  target="iframe">
+                            <i class="fa fa-folder"></i>
+                            <span>教师模块</span>
+                            <span class="pull-right-container">
+				       			<i class="fa fa-angle-left pull-right"></i>
+				   		 	</span>
+                        </a>
+                    </li>
+                    <li class="treeview">
+                        <a href="/child/page"  target="iframe">
+                            <i class="fa fa-folder"></i>
+                            <span>幼儿模块</span>
+                            <span class="pull-right-container">
+				       			<i class="fa fa-angle-left pull-right"></i>
+				   		 	</span>
+                        </a>
+                    </li>
+                    <li class="treeview">
+                        <a href="/parent/page"  target="iframe">
+                            <i class="fa fa-folder"></i>
+                            <span>家长模块</span>
+                            <span class="pull-right-container">
+				       			<i class="fa fa-angle-left pull-right"></i>
+				   		 	</span>
+                        </a>
+                    </li>
+                    <li class="treeview">
+                        <a href="#">
+                            <i class="fa fa-folder"></i>
+                            <span>用户模块</span>
+                            <span class="pull-right-container">
+				       			<i class="fa fa-angle-left pull-right"></i>
+				   		 	</span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li id="admin-login2">
+                                <a href="/user/page" target="iframe">
+                                    <i class="fa fa-circle-o"></i>全部用户
+                                </a>
+                            </li>
+                            <li id="admin-login3">
+                                <a href="/user/checkLock" target="iframe">
+                                    <i class="fa fa-circle-o"></i>查看锁定用户
+                                </a>
+                            </li>
+                            <li id="admin-login4">
+                                <a data-toggle="modal" data-target="#addUser">
+                                    <i class="fa fa-circle-o"></i>用户注册
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+
+
+                <!-- 教师导航 -->
+                <ul class="sidebar-menu"  th:if="${session.user.identityNum} eq '1'">
+                    <li class="header">菜单</li>
+                    <li><a href="/index.html" target="iframe"><i class="fa fa-dashboard"></i> <span>首页</span></a></li>
+
+                    <!-- 菜单 -->
+                    <li class="treeview">
+                        <a href="/announcement/page"  target="iframe">
+                            <i class="fa fa-folder"></i>
+                            <span>公告模块</span>
+                            <span class="pull-right-container">
+				       			<i class="fa fa-angle-left pull-right"></i>
+				   		 	</span>
+                        </a>
+                    </li>
+                    <li class="treeview">
+                        <a href="/grade/page"  target="iframe">
+                            <i class="fa fa-folder"></i>
+                            <span>班级模块</span>
+                            <span class="pull-right-container">
+				       			<i class="fa fa-angle-left pull-right"></i>
+				   		 	</span>
+                        </a>
+                    </li>
+                    <li class="treeview">
+                        <a href="/course/page"  target="iframe">
+                            <i class="fa fa-folder"></i>
+                            <span>课程模块</span>
+                            <span class="pull-right-container">
+				       			<i class="fa fa-angle-left pull-right"></i>
+				   		 	</span>
+                        </a>
+                    </li>
+                    <li class="treeview">
+                        <a href="/teacher/page"  target="iframe">
+                            <i class="fa fa-folder"></i>
+                            <span>教师模块</span>
+                            <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                        </a>
+                    </li>
+                    <li class="treeview">
+                        <a href="/child/page"  target="iframe">
+                            <i class="fa fa-folder"></i>
+                            <span>幼儿模块</span>
+                            <span class="pull-right-container">
+				       			<i class="fa fa-angle-left pull-right"></i>
+				   		 	</span>
+                        </a>
+                    </li>
+                    <li class="treeview">
+                        <a href="/parent/page"  target="iframe">
+                            <i class="fa fa-folder"></i>
+                            <span>家长模块</span>
+                            <span class="pull-right-container">
+				       			<i class="fa fa-angle-left pull-right"></i>
+				   		 	</span>
+                        </a>
+                    </li>
+                    <li class="treeview">
+                        <a th:if="${session.user.teacherId} != null" href="/teacher/detail"  target="iframe" />
+                        <a th:if="${session.user.teacherId} == null" href="/teacher/personal"  target="iframe" />
+                            <i class="fa fa-folder"></i>
+                            <span>我的信息</span>
+                            <span class="pull-right-container">
+				       			<i class="fa fa-angle-left pull-right"></i>
+				   		 	</span>
+                        </a>
+                    </li>
+                </ul>
+
+
+
+                <!-- 家长导航 -->
+                <ul class="sidebar-menu"  th:if="${session.user.identityNum} eq '0'">
+                    <li class="header">菜单</li>
+                    <li><a href="/index.html" target="iframe"><i class="fa fa-dashboard"></i> <span>首页</span></a></li>
+
+                    <!-- 菜单 -->
+                    <li class="treeview">
+                        <a href="/announcement/page"  target="iframe">
+                            <i class="fa fa-folder"></i>
+                            <span>公告模块</span>
+                            <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                        </a>
+                    </li>
+                    <li class="treeview">
+                        <a href="/grade/page"  target="iframe">
+                            <i class="fa fa-folder"></i>
+                            <span>班级模块</span>
+                            <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                        </a>
+                    </li>
+                    <li class="treeview">
+                        <a href="/course/page"  target="iframe">
+                            <i class="fa fa-folder"></i>
+                            <span>课程模块</span>
+                            <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                        </a>
+                    </li>
+                    <li class="treeview">
+                        <a href="/teacher/page"  target="iframe">
+                            <i class="fa fa-folder"></i>
+                            <span>教师模块</span>
+                            <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                        </a>
+                    </li>
+                    <li class="treeview">
+                        <a href="/parent/parentChild"  target="iframe">
+                            <i class="fa fa-folder"></i>
+                            <span>我的幼儿</span>
+                            <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                        </a>
+                    </li>
+                    <li class="treeview">
+                        <a th:if="${session.user.parentId} != null" href="/parent/getById"  target="iframe" />
+                        <a th:if="${session.user.parentId} == null" href="/parent/personal"  target="iframe" />
+                            <i class="fa fa-folder"></i>
+                            <span>我的信息</span>
+                            <span class="pull-right-container">
+				       			<i class="fa fa-angle-left pull-right"></i>
+				   		 	</span>
+                        </a>
+                    </li>
+                </ul>
+            </section>
+        </aside>
+
+        <!-- 内容区域 -->
+        <div class="content-wrapper">
+			<iframe width="100%" id="iframe" name="iframe"	onload="SetIFrameHeight()"
+					frameborder="0" src="/index.html"></iframe>
+        </div>
+        <!-- 内容区域 /-->
+    </div>
+    <div class="modal fade" tabindex="-1" role="dialog" id="editPassword">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                    </button>
+                    <h2 class="modal-title">修改密码</h2>
+                </div>
+                <div class="modal-body">
+                    <form id="editPasswordForm">
+                        <table class="table table-bordered table-striped"  id="editPasswordTable">
+                            <input id="usernamePass" th:value="${session.user.username}" class="form-control" type="hidden" name="username" hidden/>
+                            <tr>
+                                <td>原密码</td>
+                                <td><input id="oldPassword" class="form-control" type="text" name="oldPassword"/></td>
+                            </tr>
+                            <tr>
+                                <td>新密码</td>
+                                <td><input id="newPassword" class="form-control" type="text" name="newPassword"/></td>
+                            </tr>
+                            <tr>
+                                <td>确认密码</td>
+                                <td><input id="confirmPassword" class="form-control" type="text" name="confirmPassword" onkeyup="confirm()"/></td>
+                            </tr>
+                        </table>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="editPassword()">保存</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+    <div class="modal fade" tabindex="-1" role="dialog" id="addUser">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                    </button>
+                    <h2 class="modal-title">用户注册</h2>
+                </div>
+                <div class="modal-body">
+                    <form id="addUserForm">
+                        <table class="table table-bordered table-striped" id="addUserTable">
+                            <tr>
+                                <td>昵称</td>
+                                <td><input id="addNickName" class="form-control" type="text" name="nickName"/></td>
+                            </tr>
+                            <tr>
+                                <td>新密码</td>
+                                <td><input id="addNewPassword" class="form-control" type="text" name="newPassword"/></td>
+                            </tr>
+                            <tr>
+                                <td>确认密码</td>
+                                <td><input id="addConfirmPassword" class="form-control" type="text" name="confirmPassword" onkeyup="confirm2()"/></td>
+                            </tr>
+                            <tr>
+                                <td>选择身份</td>
+                                <td>
+                                    <select id="identityNum" class="form-control" name="identityNum">
+                                        <option value="-1">--请选择--</option>
+                                        <option value="0">--家长--</option>
+                                        <option value="1">--教师--</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="addUser()">保存</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+    <div class="modal fade" tabindex="-1" role="dialog" id="editNickName">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                    </button>
+                    <h2 class="modal-title">修改昵称</h2>
+                </div>
+                <div class="modal-body">
+                    <form id="editNickNameForm">
+                        <table class="table table-bordered table-striped">
+                            <input id="usernameNick" th:value="${session.user.username}" class="form-control" type="hidden" name="username" hidden/>
+                            <tr>
+                                <td><input id="nickName" class="form-control" type="text" name="nickName"/></td>
+                            </tr>
+                        </table>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="editNickName()">保存</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+    <div class="modal fade" tabindex="-1" role="dialog" id="editImg">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                    </button>
+                    <h2 class="modal-title">修改头像</h2>
+                </div>
+                <div class="modal-body">
+                    <form id="editImgForm">
+                        <table class="table table-bordered table-striped">
+                            <input id="usernameImg" th:value="${session.user.username}" class="form-control" type="hidden" name="username" hidden/>
+                            <tr>
+                                <td>图片</td>
+                                <td>
+                                    <input id="file" name="file" type="file" class="form-control">
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="editImg()">保存</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+</body>
+
+</html>
